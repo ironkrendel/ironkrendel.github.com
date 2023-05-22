@@ -1,0 +1,28 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Smart IOT Clock Project</title>
+
+</head>
+
+<body>
+    <div style="margin: 25px;text-align:center">
+        <h1 style="font-size:5vw">Индивидуальный проект - "IOT Устройства своими руками"</h1>
+    </div>
+    <div style="text-align:center">
+        <img src="circuit_schematic.png" style="width: 33%" id="circuit_img"/>
+        <img src="circuit_build.jpg" style="width: 48.3%" id="build_img"/>
+    </div>
+    <div style="margin: 3% 0 0 0;text-align:center">
+        <button onclick="window.location.href = 'code.html';" style="font-size:3vw;width: 50%;height:20vw">ПОСМОТРЕТЬ КОД</button>
+    </div>
+  <script>
+    document.getElementById("circuit_img").addEventListener("click", function(){window.location.href = "circuit_schematic.html"})
+    document.getElementById("build_img").addEventListener("click", function(){window.location.href = "circuit_build.html"})
+  </script>
+</body>
+</html>

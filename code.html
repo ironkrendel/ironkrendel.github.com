@@ -1,0 +1,155 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Smart IOT Clock Project</title>
+
+</head>
+
+<body style="background:black">
+    <style>
+        span {
+            font-size: 2vw;
+        }
+        button {
+            font-size: 5vw;
+        }
+    </style>
+    <button onclick="window.location.href = 'index.html';" id="top_btn">Вернутся назад</button>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <pre class="code_syntax" style="color:#d1d1d1;background:#000000;">
+<span class="line_wrapper"><span style="color:#008073; ">#</span><span style="color:#008073; ">include </span><span style="color:#02d045; ">&lt;</span><span style="color:#40015a; ">SPI.h</span><span style="color:#02d045; ">&gt;</span></span>
+<span class="line_wrapper"><span style="color:#008073; ">#</span><span style="color:#008073; ">include </span><span style="color:#02d045; ">&lt;</span><span style="color:#40015a; ">Wire.h</span><span style="color:#02d045; ">&gt;</span></span>
+<span class="line_wrapper"><span style="color:#008073; ">#</span><span style="color:#008073; ">include </span><span style="color:#02d045; ">&lt;</span><span style="color:#40015a; ">GyverOLED.h</span><span style="color:#02d045; ">&gt;</span></span>
+<span class="line_wrapper"><span style="color:#008073; ">#</span><span style="color:#008073; ">include </span><span style="color:#02d045; ">&lt;</span><span style="color:#40015a; ">LiquidCrystal_I2C.h</span><span style="color:#02d045; ">&gt;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"><span style="color:#e66170; font-weight:bold; ">long</span> <span style="color:#e66170; font-weight:bold; ">long</span> timer1<span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">GyverOLED<span style="color:#b060b0; ">&lt;</span>SSD1306_128x64<span style="color:#d2cd86; ">,</span> OLED_NO_BUFFER<span style="color:#b060b0; ">&gt;</span> oled<span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"><span style="color:#e66170; font-weight:bold; ">int</span> pos <span style="color:#d2cd86; ">=</span> <span style="color:#008c00; ">128</span><span style="color:#d2cd86; ">,</span> lcd_pos <span style="color:#d2cd86; ">=</span> <span style="color:#008c00; ">0</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"><span style="color:#e66170; font-weight:bold; ">bool</span> top_line_state <span style="color:#d2cd86; ">=</span> <span style="color:#e66170; font-weight:bold; ">false</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"><span style="color:#e66170; font-weight:bold; ">String</span> lcd_top_string <span style="color:#d2cd86; ">=</span> <span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">TUE 01/01/80    Hello, World!   </span><span style="color:#02d045; ">"</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">LiquidCrystal_I2C lcd<span style="color:#d2cd86; ">(</span><span style="color:#00a800; ">0x27</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">16</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">2</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"><span style="color:#e66170; font-weight:bold; ">void</span> setup<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// put your setup code here, to run once:</span></span>
+<span class="line_wrapper">  Serial<span style="color:#d2cd86; ">.</span>begin<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">9600</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// OLED</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>init<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">4</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">5</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>clear<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  </span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>home<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setScale<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">1</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">T = 23C      01/01/80</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">18</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">2</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setScale<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">2</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">00:00:00</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">44</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">7</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setScale<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">1</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">TUESDAY</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// LCD</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>init<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>backlight<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">0</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">0</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">TUE 01/01/80</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">8</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">1</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">00:00:00</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">0</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">1</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">T=23C</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  timer1 <span style="color:#d2cd86; ">=</span> millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"><span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"><span style="color:#e66170; font-weight:bold; ">void</span> loop<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// put your main code here, to run repeatedly:</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// &lt;&lt;--OLED--&gt;&gt;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">18</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">2</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setScale<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">2</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// Hours</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">3600</span> <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">10</span><span style="color:#d2cd86; ">)</span> oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">0</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">String</span><span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">3600</span><span style="color:#d2cd86; ">)</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">:</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// Minutes</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">3600</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">60</span> <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">10</span><span style="color:#d2cd86; ">)</span> oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">0</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">String</span><span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">3600</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">60</span><span style="color:#d2cd86; ">)</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">:</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// Seconds</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">60</span> <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">10</span><span style="color:#d2cd86; ">)</span> oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">0</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">String</span><span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">60</span><span style="color:#d2cd86; ">)</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; "> </span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// running line</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setScale<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">1</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span>pos<span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">5</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  oled<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">Hello, World!</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// &lt;&lt;--LCD--&gt;&gt;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">-</span> timer1 <span style="color:#d2cd86; ">&gt;</span><span style="color:#d2cd86; ">=</span> <span style="color:#008c00; ">10000</span><span style="color:#d2cd86; ">)</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">    <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>top_line_state<span style="color:#d2cd86; ">)</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">      lcd_pos <span style="color:#d2cd86; ">=</span> <span style="color:#008c00; ">0</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">    <span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper">    <span style="color:#e66170; font-weight:bold; ">else</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">      lcd_pos <span style="color:#d2cd86; ">=</span> <span style="color:#008c00; ">16</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">    <span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper">    timer1 <span style="color:#d2cd86; ">=</span> millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">    top_line_state <span style="color:#d2cd86; ">=</span> <span style="color:#d2cd86; ">!</span>top_line_state<span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// running line</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">0</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">0</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">for</span> <span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">int</span> i <span style="color:#d2cd86; ">=</span> lcd_pos<span style="color:#b060b0; ">;</span>i <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">16</span> <span style="color:#d2cd86; ">+</span> lcd_pos<span style="color:#b060b0; ">;</span>i<span style="color:#d2cd86; ">+</span><span style="color:#d2cd86; ">+</span><span style="color:#d2cd86; ">)</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">    lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span>lcd_top_string<span style="color:#d2cd86; ">[</span>i<span style="color:#d2cd86; ">]</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>setCursor<span style="color:#d2cd86; ">(</span><span style="color:#008c00; ">8</span><span style="color:#d2cd86; ">,</span> <span style="color:#008c00; ">1</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// Hours</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">3600</span> <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">10</span><span style="color:#d2cd86; ">)</span> lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">0</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">String</span><span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">3600</span><span style="color:#d2cd86; ">)</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">:</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// Minutes</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">3600</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">60</span> <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">10</span><span style="color:#d2cd86; ">)</span> lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">0</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">String</span><span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">3600</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">60</span><span style="color:#d2cd86; ">)</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">:</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#9999a9; ">// Seconds</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">60</span> <span style="color:#d2cd86; ">&lt;</span> <span style="color:#008c00; ">10</span><span style="color:#d2cd86; ">)</span> lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#02d045; ">"</span><span style="color:#00c4c4; ">0</span><span style="color:#02d045; ">"</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  lcd<span style="color:#d2cd86; ">.</span>print<span style="color:#d2cd86; ">(</span><span style="color:#e66170; font-weight:bold; ">String</span><span style="color:#d2cd86; ">(</span>millis<span style="color:#d2cd86; ">(</span><span style="color:#d2cd86; ">)</span> <span style="color:#d2cd86; ">/</span> <span style="color:#008c00; ">1000</span> <span style="color:#d2cd86; ">%</span> <span style="color:#008c00; ">60</span><span style="color:#d2cd86; ">)</span><span style="color:#d2cd86; ">)</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper"></span>
+<span class="line_wrapper">  pos<span style="color:#d2cd86; ">-</span><span style="color:#d2cd86; ">=</span><span style="color:#008c00; ">2</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#e66170; font-weight:bold; ">if</span> <span style="color:#d2cd86; ">(</span>pos <span style="color:#d2cd86; ">&lt;</span><span style="color:#d2cd86; ">=</span> <span style="color:#d2cd86; ">-</span><span style="color:#008c00; ">128</span><span style="color:#d2cd86; ">)</span> <span style="color:#b060b0; ">{</span></span>
+<span class="line_wrapper">    pos <span style="color:#d2cd86; ">=</span> <span style="color:#008c00; ">128</span><span style="color:#b060b0; ">;</span></span>
+<span class="line_wrapper">  <span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper"><span style="color:#b060b0; ">}</span></span>
+<span class="line_wrapper"></span></pre>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div>
+        <button onclick="window.location.href = 'index.html';">Вернутся назад</button>
+        <button onclick="window.location.href = '#top_btn';" style="margin:0 0 0 33%;">Наверх</button>
+    </div>
+  <script>
+
+  </script>
+</body>
+</html>
